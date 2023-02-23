@@ -21,6 +21,25 @@ class UserController {
         }
     }
 
+    async findUser(req, res) {
+        var id = req.params.id;
+        if (!isNaN(id)) {
+
+            var result = await User.findUser(id);
+            if (result.length > 0) {
+                res.status(200);
+                res.send(result);
+            } else {
+                res.status(404);
+                res.json({err: 'User not found'});
+            }
+
+        } else {
+            res.status(400);
+            res.json({err: "Id is not a number"});
+        }
+    }
+
     async create(req, res) {
         var {name, email, password} = req.body;
 
@@ -44,7 +63,6 @@ class UserController {
 
         var resultEmail = await User.findEmail(email);
         if(resultEmail.status) {
-
             var resultCreate = await User.new(name, email, password);
             if (resultCreate.status) {
                 res.status(200);
@@ -53,11 +71,14 @@ class UserController {
                 res.status(400);
                 res.json({err: resultCreate.err});
             }
-
         } else {
             res.status(404);
             res.json({err: resultEmail.err});
         }
+    }
+
+    async remove(req, res) {
+        
     }
 }
 
