@@ -25,7 +25,7 @@ class UserController {
         var id = req.params.id;
         if (!isNaN(id)) {
 
-            var result = await User.findUser(id);
+            var result = await User.findById(id);
             if (result.length > 0) {
                 res.status(200);
                 res.send(result);
@@ -78,7 +78,27 @@ class UserController {
     }
 
     async remove(req, res) {
-        
+        var id = req.params.id;
+
+        if (!isNaN(id)){
+            var resultUser = await User.findById(id);
+            if (resultUser.length > 0) {
+                
+                var resultDelete = await User.deleteUser(id);
+                if (resultDelete.status) {
+                    res.status(200);
+                    res.send("User deleted sucessfully");
+                } else {
+                    res.json({err: "opa"});
+                }
+            } else {
+                res.status(404);
+                res.json({err: "User not found"});
+            }
+        } else {
+          res.status(400);
+          res.json({err: "Syntax invalid, id is not number"});  
+        }
     }
 }
 

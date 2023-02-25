@@ -11,7 +11,7 @@ class User {
         }
     }
 
-    async findUser(id) {
+    async findById(id) {
         try {
             var response = await knex.select(["name", "email"]).where({id: id}).table("user");
             return response;
@@ -45,6 +45,15 @@ class User {
             return {status: false, err: "Failed to create user"};
         }
     }
+
+    async deleteUser(id) {
+        try {
+            await knex.delete().where({id: id}).table('user');
+            return {status: true};
+        } catch(err) {
+            return {status: false, err: "error deleting user"};
+        }
+    }
 }
 
-module.exports = new User();
+module.exports = new User();    
