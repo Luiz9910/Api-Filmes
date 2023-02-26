@@ -25,9 +25,9 @@ class User {
             var result = await knex.select().where({email: email}).table('user');
 
             if (result.length > 0) {
-                return {status: false, err: "Email exist"};
+                return {status: false, err: "Email exist", result: result[0]};
             } else {
-                return {status: true, err: "Error is creating user"};
+                return {status: true, err: "User not found"};
             }
         } catch (err) {
             return {status: false};

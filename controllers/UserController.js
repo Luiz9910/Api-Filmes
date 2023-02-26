@@ -1,4 +1,8 @@
 const User = require("../models/User");
+const bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
+
+var secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
 class UserController {
     async index(req, res) {
@@ -110,14 +114,46 @@ class UserController {
         
             if (resultUpdate.status) {
                 res.status(200);
-                res.send("all right!")
+                res.send("all right!");
             } else {
                 res.status(resultUpdate.estate);
                 res.json({err: resultUpdate.err});
             }
         } else {
             res.status(400);
-            res.json({err: "Id is not a number or is invalid"})
+            res.json({err: "Id is not a number or is invalid"});
+        }
+    }
+    
+    async login(req, res) {
+        var {email, password} = req.body; 
+
+        if (email == undefined) {
+            res.status();
+            res.json({err: "Email is invalid "});
+            return;
+        }
+
+        if (password == undefined) {
+            res.status();
+            res.json({err: "Password is invalid "});
+            return;
+        }
+
+        var resultUserEmail = await User.findEmail(email);
+        if (resultUserEmail.result.email == email) {
+            if (await bcrypt.compare(password, resultUserEmail.result.password)) {
+                var token = jwt.sign({ email: resultUserEmail.result.email, name: resultUserEmail.result.name}, secret);
+                
+                res.status(200);
+                res.json({token: token});
+            } else {
+                res.status(401);
+                res.json({err: "Invalid password"})
+            }
+        } else {
+            res.status(406);
+            res.json({err: "User not found "});
         }
     }
 }
