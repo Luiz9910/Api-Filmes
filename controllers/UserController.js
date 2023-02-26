@@ -100,6 +100,26 @@ class UserController {
           res.json({err: "Syntax invalid, id is not number"});  
         }
     }
+
+    async userUpdate(req, res) {
+        var {name, email} = req.body;
+        var id = req.params.id;
+
+        if (!isNaN) {
+            var resultUpdate = await User.update(email, name, id);
+        
+            if (resultUpdate.status) {
+                res.status(200);
+                res.send("all right!")
+            } else {
+                res.status(resultUpdate.estate);
+                res.json({err: resultUpdate.err});
+            }
+        } else {
+            res.status(400);
+            res.json({err: "Id is not a number or is invalid"})
+        }
+    }
 }
 
 module.exports = new UserController();

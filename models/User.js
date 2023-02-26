@@ -54,6 +54,30 @@ class User {
             return {status: false, err: "error deleting user"};
         }
     }
+
+    async update(email, name, id) {
+        var resultId = await this.findById(id);
+        var dataUser = {};
+
+        if (resultId.length > 0) {
+            if (email != undefined) {
+                dataUser.email = email;
+            }   
+
+            if (name != undefined) {
+                dataUser.name = name;
+            }
+
+            try {
+                await knex.update(dataUser).where({id: id}).table("user");
+                return {status: true};
+            } catch(err) {
+                return {status: false, err: "error updating user", estate: 406 };
+            }
+        } else {
+            return {status: false, err: "User with this id does not exist", estate: 404};
+        }
+    }
 }
 
 module.exports = new User();    
