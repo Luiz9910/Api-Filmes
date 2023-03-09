@@ -27,7 +27,7 @@ class User {
             if (result.length > 0) {
                 return {status: false, err: "Email exist", result: result[0]};
             } else {
-                return {status: true, err: "User not found"};
+                return {status: true, err: "User not found", result: undefined};
             }
         } catch (err) {
             return {status: false};

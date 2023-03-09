@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const PasswordToken = require("../models/PasswordToken");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 
@@ -27,10 +28,11 @@ class UserController {
 
     async findUser(req, res) {
         var id = req.params.id;
+        console.log('dasda');
         if (!isNaN(id)) {
-
             var result = await User.findById(id);
             if (result.length > 0) {
+                console.log(result);
                 res.status(200);
                 res.send(result);
             } else {
@@ -70,7 +72,7 @@ class UserController {
             var resultCreate = await User.new(name, email, password);
             if (resultCreate.status) {
                 res.status(200);
-                res.send("Tudo certo");
+                res.send("all right!");
             } else {
                 res.status(400);
                 res.json({err: resultCreate.err});
@@ -124,6 +126,9 @@ class UserController {
             res.json({err: "Id is not a number or is invalid"});
         }
     }
+
+    async recoverpassword(req, res) {
+    }
     
     async login(req, res) {
         var {email, password} = req.body; 
@@ -141,16 +146,24 @@ class UserController {
         }
 
         var resultUserEmail = await User.findEmail(email);
-        if (resultUserEmail.result.email == email) {
-            if (await bcrypt.compare(password, resultUserEmail.result.password)) {
-                var token = jwt.sign({ email: resultUserEmail.result.email, name: resultUserEmail.result.name}, secret);
-                
-                res.status(200);
-                res.json({token: token});
+
+        if (resultUserEmail.result != undefined) {
+
+            if (resultUserEmail.result.email == email) {
+                if (await bcrypt.compare(password, resultUserEmail.result.password)) {
+                    var token = jwt.sign({ email: resultUserEmail.result.email, name: resultUserEmail.result.name}, secret);
+                    
+                    res.status(200);
+                    res.json({token: token});
+                } else {
+                    res.status(401);
+                    res.json({err: "Invalid password"})
+                }
             } else {
-                res.status(401);
-                res.json({err: "Invalid password"})
+                   res.status(406);
+            res.json({err: "User not found "});
             }
+
         } else {
             res.status(406);
             res.json({err: "User not found "});
