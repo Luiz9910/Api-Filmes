@@ -28,13 +28,20 @@ class UserController {
 
     async findUser(req, res) {
         var id = req.params.id;
-        console.log('dasda');
+
         if (!isNaN(id)) {
+
             var result = await User.findById(id);
-            if (result.length > 0) {
-                console.log(result);
+
+            if (!result.status) {
+                res.status(400);
+                res.json({err: result.err});
+                return;
+            }
+
+            if (result.response.length > 0) {
                 res.status(200);
-                res.send(result);
+                res.send(result.response[0]);
             } else {
                 res.status(404);
                 res.json({err: 'User not found'});
@@ -68,6 +75,7 @@ class UserController {
         }
 
         var resultEmail = await User.findEmail(email);
+
         if(resultEmail.status) {
             var resultCreate = await User.new(name, email, password);
             if (resultCreate.status) {
@@ -87,7 +95,15 @@ class UserController {
         var id = req.params.id;
 
         if (!isNaN(id)){
-            var resultUser = await User.findById(id);
+            var result = await User.findById(id);
+            var resultUser = result.response
+        
+            if (!result.status) {
+                res.status(400);
+                res.json({err: result.err});
+                return;
+            }
+
             if (resultUser.length > 0) {
                 
                 var resultDelete = await User.deleteUser(id);
@@ -97,6 +113,7 @@ class UserController {
                 } else {
                     res.json({err: "opa"});
                 }
+
             } else {
                 res.status(404);
                 res.json({err: "User not found"});
@@ -111,9 +128,10 @@ class UserController {
         var {name, email} = req.body;
         var id = req.params.id;
 
-        if (!isNaN) {
+        if (!isNaN(id)) {
+
             var resultUpdate = await User.update(email, name, id);
-        
+
             if (resultUpdate.status) {
                 res.status(200);
                 res.send("all right!");
@@ -121,6 +139,7 @@ class UserController {
                 res.status(resultUpdate.estate);
                 res.json({err: resultUpdate.err});
             }
+            
         } else {
             res.status(400);
             res.json({err: "Id is not a number or is invalid"});
@@ -128,6 +147,17 @@ class UserController {
     }
 
     async recoverpassword(req, res) {
+        var email = req.body.email;
+
+        var resultPassword = await PasswordToken.create(email);
+
+        if (resultPassword.status) {
+            res.status(200);
+            res.json({token: resultPassword.token})
+        } else {
+            res.status(404);
+            res.json({err: resultPassword.err})
+        }
     }
     
     async login(req, res) {

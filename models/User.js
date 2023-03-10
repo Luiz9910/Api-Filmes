@@ -1,4 +1,4 @@
-const knex = require('../database/connection');
+var knex = require('../database/connection');
 const bcrypt = require('bcrypt');
 
 class User {
@@ -14,9 +14,9 @@ class User {
     async findById(id) {
         try {
             var response = await knex.select(["name", "email"]).where({id: id}).table("user");
-            return response;
+            return {status: true, response};
         } catch (err) {
-            return {status: false};
+            return {status: false, err: "error in server response"};
         }
     }
 
@@ -56,28 +56,30 @@ class User {
     }
 
     async update(email, name, id) {
-        var resultId = await this.findById(id);
+        var result = await this.findById(id);
+        var resultId = result.response;
+      
         var dataUser = {};
-
+      
         if (resultId.length > 0) {
             if (email != undefined) {
                 dataUser.email = email;
             }   
-
+      
             if (name != undefined) {
                 dataUser.name = name;
             }
-
+            
             try {
                 await knex.update(dataUser).where({id: id}).table("user");
-                return {status: true};
-            } catch(err) {
-                return {status: false, err: "error updating user", estate: 406 };
+                return {status: true}
+            } catch (err) {
+                return {status: false, err: "Error updating user", estate: 500};
             }
         } else {
             return {status: false, err: "User with this id does not exist", estate: 404};
         }
-    }
+      }
 }
 
 module.exports = new User();    
