@@ -77,6 +77,7 @@ class UserController {
         var resultEmail = await User.findEmail(email);
 
         if(resultEmail.status) {
+
             var resultCreate = await User.new(name, email, password);
             if (resultCreate.status) {
                 res.status(200);
@@ -85,6 +86,7 @@ class UserController {
                 res.status(400);
                 res.json({err: resultCreate.err});
             }
+            
         } else {
             res.status(404);
             res.json({err: resultEmail.err});
@@ -96,7 +98,7 @@ class UserController {
 
         if (!isNaN(id)){
             var result = await User.findById(id);
-            var resultUser = result.response
+            var resultUser = result.response;
         
             if (!result.status) {
                 res.status(400);
@@ -118,6 +120,7 @@ class UserController {
                 res.status(404);
                 res.json({err: "User not found"});
             }
+
         } else {
           res.status(400);
           res.json({err: "Syntax invalid, id is not number"});  
@@ -131,7 +134,6 @@ class UserController {
         if (!isNaN(id)) {
 
             var resultUpdate = await User.update(email, name, id);
-
             if (resultUpdate.status) {
                 res.status(200);
                 res.send("all right!");
@@ -153,10 +155,10 @@ class UserController {
 
         if (resultPassword.status) {
             res.status(200);
-            res.json({token: resultPassword.token})
+            res.json({token: resultPassword.token});
         } else {
-            res.status(404);
-            res.json({err: resultPassword.err})
+            res.status(resultPassword.estate);
+            res.json({err: resultPassword.err});
         }
     }
     
@@ -176,7 +178,6 @@ class UserController {
         }
 
         var resultUserEmail = await User.findEmail(email);
-
         if (resultUserEmail.result != undefined) {
 
             if (resultUserEmail.result.email == email) {
@@ -187,11 +188,11 @@ class UserController {
                     res.json({token: token});
                 } else {
                     res.status(401);
-                    res.json({err: "Invalid password"})
+                    res.json({err: "Invalid password"});
                 }
             } else {
-                   res.status(406);
-            res.json({err: "User not found "});
+                res.status(406);
+                res.json({err: "User not found "});
             }
 
         } else {

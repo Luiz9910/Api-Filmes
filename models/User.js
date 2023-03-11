@@ -62,6 +62,7 @@ class User {
         var dataUser = {};
       
         if (resultId.length > 0) {
+
             if (email != undefined) {
                 dataUser.email = email;
             }   
@@ -76,6 +77,7 @@ class User {
             } catch (err) {
                 return {status: false, err: "Error updating user", estate: 500};
             }
+
         } else {
             return {status: false, err: "User with this id does not exist", estate: 404};
         }
