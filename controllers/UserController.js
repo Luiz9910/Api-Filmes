@@ -2,6 +2,7 @@ const User = require("../models/User");
 const PasswordToken = require("../models/PasswordToken");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
+const { validate } = require("../models/PasswordToken");
 
 var secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
@@ -86,7 +87,7 @@ class UserController {
                 res.status(400);
                 res.json({err: resultCreate.err});
             }
-            
+
         } else {
             res.status(404);
             res.json({err: resultEmail.err});
@@ -160,6 +161,33 @@ class UserController {
             res.status(resultPassword.estate);
             res.json({err: resultPassword.err});
         }
+    }
+
+    async changePassword(req, res) {
+        var token = req.body.token;
+        var id = req.params.id;
+
+        if (!isNaN(id)) {
+
+            var resultToken = await PasswordToken.validateTokenOfUser(id);
+            if (resultToken.status) {
+
+                if (resultToken.result[0].token == token) {
+                    res.status(200);
+                    res.json({response: "All Right!"});
+                } else {
+                    res.status(406);
+                    res.json({err: "Sintax error (token)"});
+                }
+            }else {
+                res.status(resultToken.estate);
+                res.json({err: resultToken.err});
+            }
+
+        } else {
+            res.status(400);
+            res.json({err: "Id is not a number or is invalid"});
+        }    
     }
     
     async login(req, res) {
