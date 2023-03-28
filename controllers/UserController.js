@@ -2,7 +2,6 @@ const User = require("../models/User");
 const PasswordToken = require("../models/PasswordToken");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
-const { validate } = require("../models/PasswordToken");
 
 var secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
