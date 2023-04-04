@@ -80,8 +80,8 @@ class UserController {
 
             var resultCreate = await User.new(name, email, password);
             if (resultCreate.status) {
-                res.status(200);
-                res.send("all right!");
+                res.status(201);
+                res.json({response: "Sucessfully created"});
             } else {
                 res.status(400);
                 res.json({err: resultCreate.err});

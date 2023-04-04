@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const Movie = require("../models/Movie");
 
-class Movie {
+class MovieController {
     async getAll(req, res) {
 
     }
@@ -33,13 +33,17 @@ class Movie {
             return;
         }
 
-        var resultSaveFilme = await Movie.create(title, details, sinopse, duration);
+        var resultSaveFilme = await Movie.new(title, details, sinopse, duration);
 
         if (!resultSaveFilme.status) {
             res.status(500);
-            res.json({err: "error in saving movie"});
+            res.json({err: resultSaveFilme.err});
+            return;
         }
 
-        res.send("All right")
+        res.status(201);
+        res.json({result: "Successfully saved movie"});
     }
 }
+
+module.exports = new MovieController();
