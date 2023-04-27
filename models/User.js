@@ -2,7 +2,7 @@ var knex = require('../database/connection');
 const bcrypt = require('bcrypt');
 
 class User {
-    async index() {
+    async getAll() {
         try {
             var result = await knex.select(["id","email", "name"]).table("user");
             return {status: true, data: result};
@@ -39,19 +39,10 @@ class User {
             const saltRounds = 10;
             var hash = await bcrypt.hash(password, saltRounds);
 
-            await knex.insert({email, password: hash, name}).table("user");
+            await knex.insert({email, password: hash, name, role: 0}).table("user");
             return {status: true};
         } catch(err) {
             return {status: false, err: "Failed to create user"};
-        }
-    }
-
-    async deleteUser(id) {
-        try {
-            await knex.delete().where({id: id}).table('user');
-            return {status: true};
-        } catch(err) {
-            return {status: false, err: "error deleting user"};
         }
     }
 
@@ -81,7 +72,17 @@ class User {
         } else {
             return {status: false, err: "User with this id does not exist", estate: 404};
         }
-      }
+    }
+
+      
+    async deleteUser(id) {
+        try {
+            await knex.delete().where({id: id}).table('user');
+            return {status: true};
+        } catch(err) {
+            return {status: false, err: "error deleting user"};
+        }
+    }
 }
 
 module.exports = new User();    

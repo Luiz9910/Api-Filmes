@@ -5,7 +5,13 @@ class PasswordToken {
     async create(email) {
         var resultUser = await User.findEmail(email);
 
-        var token = 1231231;
+        let numerosAleatorios = [];
+        for (let i = 0; i < 6; i++) {
+          numerosAleatorios.push(Math.floor(Math.random() * 9)); // gera um número aleatório entre 0 e 99
+        }
+
+        const token = numerosAleatorios.join("");
+
         if (resultUser != undefined) {         
                 try {
                     await knex.insert({token, used: 0, user_id:resultUser.result.id }).table("passwordtokens");

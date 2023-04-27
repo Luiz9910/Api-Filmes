@@ -7,7 +7,7 @@ var secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
 class UserController {
     async index(req, res) {
-        var response = await User.index();
+        var response = await User.getAll();
 
         if (response.status) {
 
@@ -21,7 +21,7 @@ class UserController {
             }
 
         } else {
-            res.status(406);
+            res.status(500);
             res.json({err: response.err});
         }
     }
