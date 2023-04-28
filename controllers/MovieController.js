@@ -165,7 +165,6 @@ class MovieController {
 
         res.status(200);
         res.json({response: "Sucessfully deleted"})
-        
     }
 }
 

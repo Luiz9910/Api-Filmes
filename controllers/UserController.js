@@ -2,6 +2,7 @@ const User = require("../models/User");
 const PasswordToken = require("../models/PasswordToken");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
+const TokenJwtAuth = require("../middleware/TokenJwtAuth");
 
 var secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
@@ -107,7 +108,6 @@ class UserController {
             }
 
             if (resultUser.length > 0) {
-                
                 var resultDelete = await User.deleteUser(id);
                 if (resultDelete.status) {
                     res.status(200);
@@ -132,7 +132,7 @@ class UserController {
         var id = req.params.id;
 
         if (!isNaN(id)) {
-
+            console.log(req.user)
             var resultUpdate = await User.update(email, name, id);
             if (resultUpdate.status) {
                 res.status(200);
@@ -193,7 +193,7 @@ class UserController {
         var {email, password} = req.body; 
 
         if (email == undefined) {
-            res.status();
+            res.status(200);
             res.json({err: "Email is invalid "});
             return;
         }
@@ -209,8 +209,14 @@ class UserController {
 
             if (resultUserEmail.result.email == email) {
                 if (await bcrypt.compare(password, resultUserEmail.result.password)) {
-                    var token = jwt.sign({ email: resultUserEmail.result.email, name: resultUserEmail.result.name}, secret);
-                    
+                    var token = jwt.sign({id: resultUserEmail.result.id,
+                            name:resultUserEmail.result.name,
+                            email, 
+                            role: resultUserEmail.result.role
+                        }, 
+                        secret,
+                        {expiresIn: "48h"}
+                    );
                     res.status(200);
                     res.json({token: token});
                 } else {

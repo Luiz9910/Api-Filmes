@@ -47,6 +47,7 @@ class Movie {
             return {status: false, err: "Error in server"};
         }
     }
+    
     async destroy(id) {
         try {
             await knex.delete().where({id: id}).table("movie");
