@@ -7,6 +7,10 @@ const TokenJwtAuth = require("../middleware/TokenJwtAuth");
 var secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
 class UserController {
+    constructor() {
+        this.secrett = "dadadad"
+    }
+
     async index(req, res) {
         var response = await User.getAll();
 
@@ -108,6 +112,7 @@ class UserController {
             }
 
             if (resultUser.length > 0) {
+                
                 var resultDelete = await User.deleteUser(id);
                 if (resultDelete.status) {
                     res.status(200);
@@ -130,9 +135,7 @@ class UserController {
     async userUpdate(req, res) {
         var {name, email} = req.body;
         var id = req.params.id;
-
         if (!isNaN(id)) {
-            console.log(req.user)
             var resultUpdate = await User.update(email, name, id);
             if (resultUpdate.status) {
                 res.status(200);
@@ -210,13 +213,12 @@ class UserController {
             if (resultUserEmail.result.email == email) {
                 if (await bcrypt.compare(password, resultUserEmail.result.password)) {
                     var token = jwt.sign({id: resultUserEmail.result.id,
-                            name:resultUserEmail.result.name,
-                            email, 
-                            role: resultUserEmail.result.role
-                        }, 
-                        secret,
-                        {expiresIn: "48h"}
-                    );
+                        name:resultUserEmail.result.name,
+                        email, 
+                        role: resultUserEmail.result.role
+                    }, 
+                    secret,
+                    {expiresIn: "48h"});
                     res.status(200);
                     res.json({token: token});
                 } else {

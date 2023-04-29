@@ -1,18 +1,18 @@
-const express = require("express");
+const express = require("express")
 const router = express.Router();
-const UserController = require("../controllers/UserController");
+const UserController = require("../controllers/UserController")
 const MovieController = require("../controllers/MovieController");
 const AdminAuth = require("../middleware/AdminAuth");
 const Movie = require("../models/Movie");
 const AuthToken = require("../middleware/TokenJwtAuth");
-
+const ValidationUser = require("../middleware/ValidationUser");
 
 //Users
 router.get('/',  AuthToken, AdminAuth, UserController.index);
 router.get('/user/:id', AuthToken, AdminAuth, UserController.findUser);
 router.post('/user', UserController.create);
-router.delete('/user/:id', AuthToken, UserController.remove);
-router.put('/user/:id', AuthToken, UserController.userUpdate);
+router.delete('/user/:id', AuthToken, ValidationUser, UserController.remove);
+router.put('/user/:id', AuthToken, ValidationUser, UserController.userUpdate);
 router.post('/recoverpassword', UserController.recoverpassword);
 router.post("/changepassword/:id", UserController.changePassword);
 router.post('/login', UserController.login);
