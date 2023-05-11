@@ -1,16 +1,11 @@
 const User = require("../models/User");
 const PasswordToken = require("../models/PasswordToken");
 const bcrypt = require("bcrypt");
-var jwt = require("jsonwebtoken");
-const TokenJwtAuth = require("../middleware/TokenJwtAuth");
+const jwt = require("jsonwebtoken");
 
-var secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
+const secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
 class UserController {
-    constructor() {
-        this.secrett = "dadadad"
-    }
-
     async index(req, res) {
         var response = await User.getAll();
 
@@ -206,7 +201,7 @@ class UserController {
             res.json({err: "Password is invalid "});
             return;
         }
-
+        
         var resultUserEmail = await User.findEmail(email);
         if (resultUserEmail.result != undefined) {
 

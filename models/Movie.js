@@ -1,9 +1,9 @@
-var knex = require('../database/connection');
+const knex = require('../database/connection');
 
 class Movie {
-    async new(title, details, sinopse, duration) {
+    async new(title, details, sinopse, duration, year, classification, cover) {
         try {
-            await knex.insert({title, details, sinopse, duration}).table("movie");
+            await knex.insert({title, details, sinopse, duration, year, classification, cover}).table("movie");
             return {status: true};
         } catch (e) {
             return {status: false, err: "error in saving movie"};

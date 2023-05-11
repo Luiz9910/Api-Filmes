@@ -1,5 +1,5 @@
-var knex = require("../database/connection");
-var User = require("./User");
+const knex = require("../database/connection");
+const User = require("./User");
 
 class PasswordToken {
     async create(email) {

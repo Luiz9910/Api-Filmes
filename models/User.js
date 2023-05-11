@@ -1,4 +1,4 @@
-var knex = require('../database/connection');
+const knex = require('../database/connection');
 const bcrypt = require('bcrypt');
 
 class User {

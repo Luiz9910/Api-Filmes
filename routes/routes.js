@@ -3,7 +3,6 @@ const router = express.Router();
 const UserController = require("../controllers/UserController")
 const MovieController = require("../controllers/MovieController");
 const AdminAuth = require("../middleware/AdminAuth");
-const Movie = require("../models/Movie");
 const AuthToken = require("../middleware/TokenJwtAuth");
 const ValidationUser = require("../middleware/ValidationUser");
 
@@ -18,7 +17,7 @@ router.post("/changepassword/:id", UserController.changePassword);
 router.post('/login', UserController.login);
 
 //Movies
-router.get("/", MovieController.getAll);
+router.get("/movies", MovieController.getAll);
 router.get("/movie/:name", MovieController.getMovie);
 router.post("/movie", MovieController.create);
 router.put("/movie/:id", MovieController.update);

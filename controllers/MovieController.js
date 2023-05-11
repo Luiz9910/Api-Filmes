@@ -1,6 +1,4 @@
-const User = require("../models/User");
 const Movie = require("../models/Movie");
-const { response } = require("express");
 
 class MovieController {
     async getAll(req, res) {
@@ -45,7 +43,7 @@ class MovieController {
     }
 
     async create(req, res) {
-        let {title, details, sinopse, duration} = req.body;
+        let {title, details, sinopse, duration, year, classification, cover} = req.body;
 
         if (title == undefined) {
             res.status(406);
@@ -70,8 +68,29 @@ class MovieController {
             res.json({err: "Invalid name"});
             return;
         }
+        
+        if (year == undefined) {
+            res.status(406);
+            res.json({err: "Invalid year"});
+            return;
+        }
+        
+        if (classification == undefined) {
+            res.status(406);
+            res.json({err: "Invalid classification"});
+            return;
+        }
+        
+        if (cover == undefined) {
+            res.status(406);
+            res.json({err: "Invalid cover"});
+            return;
+        }
 
-        var resultSaveFilme = await Movie.new(title, details, sinopse, duration);
+        year = year.replace(/\//g, '-');
+        year = new Date(year).getFullYear()
+
+        var resultSaveFilme = await Movie.new(title, details, sinopse, duration, year, classification, cover);
 
         if (!resultSaveFilme.status) {
             res.status(500);
@@ -84,7 +103,7 @@ class MovieController {
     }
 
     async update(req, res) {
-        var {title, details, sinopse, duration} = req.body;
+        var {title, details, sinopse, duration, year, classification, cover} = req.body;
         var id = req.params.id;
         var dataMovie = {};
 
@@ -121,6 +140,18 @@ class MovieController {
   
         if (duration != undefined) {
             dataMovie.duration = duration;
+        }
+
+        if (year != undefined) {
+            dataMovie.year = year;
+        }
+
+        if (classification != undefined) {
+            dataMovie.classification = classification;
+        }   
+  
+        if (cover != undefined) {
+            dataMovie.cover = cover;
         }
 
         var responseUpdate = await Movie.update(dataMovie, id);
