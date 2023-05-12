@@ -7,143 +7,164 @@ const secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
 class UserController {
     async index(req, res) {
-        var response = await User.getAll();
+        let response = await User.getAll();
 
-        if (response.status) {
-
-            var data = response.data;
-            if (data.length > 0) {
-                res.status(200);
-                res.send(data);
-            } else {
-                res.status(404);
-                res.json({err: "Not found"});
-            }
-
-        } else {
+        if (!response.status) {
             res.status(500);
             res.json({err: response.err});
+            return;
         }
+
+        let data = response.data;
+        if (data.length <= 0) {
+            res.status(204);
+            res.json({err: "No Content"});
+            return;
+        } 
+
+        res.status(200);
+        res.send(data);
     }
 
     async findUser(req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
 
-        if (!isNaN(id)) {
-
-            var result = await User.findById(id);
-
-            if (!result.status) {
-                res.status(400);
-                res.json({err: result.err});
-                return;
-            }
-
-            if (result.response.length > 0) {
-                res.status(200);
-                res.send(result.response[0]);
-            } else {
-                res.status(404);
-                res.json({err: 'User not found'});
-            }
-
-        } else {
+        if (isNaN(id)) {
             res.status(400);
             res.json({err: "Id is not a number"});
+            return;
         }
+
+        let result = await User.findById(id);
+        if (!result.status) {
+            res.status(500);
+            res.json({err: result.err});
+            return;
+        }
+
+        if (result.response.length <= 0) {
+            res.status(404);
+            res.json({err: 'User not found'});
+            return;
+        }
+
+        res.status(200);
+        res.send(result.response[0]);
     }
 
     async create(req, res) {
-        var {name, email, password} = req.body;
+        let {name, email, password} = req.body;
+        let contentBody = [name, email, password]
+        const nameContent = ["name", "email", "password"]
 
-        if (name == undefined) {
-            res.status(406);
-            res.json({err: "Invalid name"});
-            return;
-        }
-
-        if (email == undefined) {
-            res.status(406);
-            res.json({err: "Invalid email"});
-            return;
-        }
-
-        if (password == undefined) {
-            res.status(406);
-            res.json({err: "Invalid password"});
-            return;
+        for (let content of contentBody) {
+            for (let cont of nameContent) {
+                if (content == undefined || content.length == 0) {
+                    res.status(406);
+                    res.json({err: `Invalid ${cont}`});
+                    return;
+                }
+            }
         }
 
         var resultEmail = await User.findEmail(email);
-
-        if(resultEmail.status) {
-
-            var resultCreate = await User.new(name, email, password);
-            if (resultCreate.status) {
-                res.status(201);
-                res.json({response: "Sucessfully created"});
-            } else {
-                res.status(400);
-                res.json({err: resultCreate.err});
-            }
-
-        } else {
-            res.status(404);
+        if(!resultEmail.status) {
+            res.status(500);
             res.json({err: resultEmail.err});
+            return;
+        } 
+
+        if (resultEmail.result.length > 0) {
+            res.status(409);
+            res.json({err: "Email exist"});
+            return;
         }
-    }
 
-    async remove(req, res) {
-        var id = req.params.id;
+        const saltRounds = 10;
+        let hash = await bcrypt.hash(password, saltRounds);
 
-        if (!isNaN(id)){
-            var result = await User.findById(id);
-            var resultUser = result.response;
-        
-            if (!result.status) {
-                res.status(400);
-                res.json({err: result.err});
-                return;
-            }
-
-            if (resultUser.length > 0) {
-                
-                var resultDelete = await User.deleteUser(id);
-                if (resultDelete.status) {
-                    res.status(200);
-                    res.send("User deleted sucessfully");
-                } else {
-                    res.json({err: "opa"});
-                }
-
-            } else {
-                res.status(404);
-                res.json({err: "User not found"});
-            }
-
-        } else {
-          res.status(400);
-          res.json({err: "Syntax invalid, id is not number"});  
+        let resultCreate = await User.new(name, email, hash);
+        if (!resultCreate.status) {
+            res.status(500);
+            res.json({err: resultCreate.err});
         }
+
+        res.status(201);
+        res.json({response: "Sucessfully created"});
     }
 
     async userUpdate(req, res) {
-        var {name, email} = req.body;
-        var id = req.params.id;
-        if (!isNaN(id)) {
-            var resultUpdate = await User.update(email, name, id);
-            if (resultUpdate.status) {
-                res.status(200);
-                res.send("all right!");
-            } else {
-                res.status(resultUpdate.estate);
-                res.json({err: resultUpdate.err});
-            }
-            
-        } else {
+        let {name, email} = req.body;
+        let dataUser = {};
+
+        let id = req.params.id;
+        if (isNaN(id)) {
             res.status(400);
             res.json({err: "Id is not a number or is invalid"});
+            return;
         }
+
+        let result = await User.findById(id);
+        let resultId = result.response;
+
+        if (resultId.length <= 0) {
+            res.status(404)
+            res.json({err: "User not found"})
+            return;
+        }
+        
+        let contentBody = [name, email]
+        const nameContent = ["name", "email"]
+        contentBody.forEach((content, index) => {
+            if (content != undefined && content.length > 0) {
+                dataUser[nameContent[index]] = content;
+            }
+        })
+
+        let resultUpdate = await User.update(dataUser, id);
+        if (!resultUpdate.status) {
+            res.status(500);
+            res.json({err: "Error updating"});
+            return;
+        }
+
+        res.status(200);
+        res.json({response: "All right!"})
+    }
+
+    async remove(req, res) {
+        let id = req.params.id;
+
+        if (isNaN(id)){
+            res.status(400);
+            res.json({err: "Syntax invalid, id is not number"});  
+            return;
+        }    
+
+        let result = await User.findById(id);
+        let resultUser = result.response;
+    
+        if (!result.status) {
+            res.status(500);
+            res.json({err: result.err});
+            return;
+        }
+
+        if (resultUser.length <= 0) {
+            res.status(404);
+            res.json({err: "User not found"});
+            return;
+        } 
+
+        let resultDelete = await User.deleteUser(id);
+        if (!resultDelete.status) {
+            res.status(500);
+            res.json({err: resultDelete.err});
+            return;
+        }
+        
+        res.status(200);
+        res.json({response: "User deleted sucessfully"});
     }
 
     async recoverpassword(req, res) {
@@ -190,45 +211,46 @@ class UserController {
     async login(req, res) {
         var {email, password} = req.body; 
 
-        if (email == undefined) {
-            res.status(200);
+        if (email == undefined || email.length == 0) {
+            res.status(400);
             res.json({err: "Email is invalid "});
             return;
         }
 
-        if (password == undefined) {
-            res.status();
+        if (password == undefined || password.length == 0) {
+            res.status(400);
             res.json({err: "Password is invalid "});
             return;
         }
         
-        var resultUserEmail = await User.findEmail(email);
-        if (resultUserEmail.result != undefined) {
-
-            if (resultUserEmail.result.email == email) {
-                if (await bcrypt.compare(password, resultUserEmail.result.password)) {
-                    var token = jwt.sign({id: resultUserEmail.result.id,
-                        name:resultUserEmail.result.name,
-                        email, 
-                        role: resultUserEmail.result.role
-                    }, 
-                    secret,
-                    {expiresIn: "48h"});
-                    res.status(200);
-                    res.json({token: token});
-                } else {
-                    res.status(401);
-                    res.json({err: "Invalid password"});
-                }
-            } else {
-                res.status(406);
-                res.json({err: "User not found "});
-            }
-
-        } else {
-            res.status(406);
-            res.json({err: "User not found "});
+        let resultUserEmail = await User.findEmail(email);
+        resultUserEmail = resultUserEmail.result[0]
+        if (resultUserEmail == undefined) {
+            res.status(404);
+            res.json({err: "User not found "}); 
+            return;
         }
+
+        if (resultUserEmail.email != email) {
+            res.status(401);
+            res.json({err: "Email is incorrect"});
+            return;
+        } 
+        
+        if (!await bcrypt.compare(password, resultUserEmail.password)) {
+            res.status(401);
+            res.json({err: "Invalid password"});
+        }
+        
+        let token = jwt.sign({id: resultUserEmail.id,
+            name:resultUserEmail.name,
+            email, 
+            role: resultUserEmail.role
+        }, 
+        secret,
+        {expiresIn: "48h"});
+        res.status(200);
+        res.json({token: token});
     }
 }
 

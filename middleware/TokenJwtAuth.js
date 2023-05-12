@@ -3,29 +3,25 @@ const secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
 module.exports = function(req, res, next) {
     const authToken = req.headers['authorization'];
+    const bearer = authToken.split(' ');
+    let token = bearer[1];
 
-    if (authToken != undefined) {
-        const bearer = authToken.split(' ');
-        var token = bearer[1];
-
-        try {
-            var decoded = jwt.verify(token, secret);
-            if (decoded) {
-                req.user = {id: decoded.id, name: decoded.name, email: decoded.email, role: decoded.role.data[0]}
-                next();
-            } else {
-                res.status(403);
-                res.send("Fail in authentication process");
-                return;
-            }
-        } catch (err) {
-            res.status(403);
-            res.send("Fail in authentication process");
-            return;
-        }
-    } else {
+    if (token == undefined) {
         res.status(403);
-        res.send("You are not allowed to access this");
+        res.json({err:"You are not allowed to access this"});
         return;
+    }
+
+    try {
+        let decoded = jwt.verify(token, secret);
+        if (!decoded) {
+            throw new authToken("Fail in authentication process")
+        }
+
+        req.user = {id: decoded.id, name: decoded.name, email: decoded.email, role: decoded.role.data[0]}
+        next();
+    } catch (err) {
+        res.status(403);
+        res.json({err: err.message});
     }
 }

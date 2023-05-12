@@ -15,7 +15,7 @@ class Movie {
             var result = await knex.select().table("movie");
             return {status: true, data: result};
         }catch(err) {
-            return {status: false, err: "server error"};
+            return {status: false, err: "error in getting movies"};
         }
     }
     
@@ -26,36 +26,36 @@ class Movie {
                 .table("movie");
             return {status: true, data: response};
         } catch (err) {
-            return {status: false, err: "server error"};
+            return {status: false, err: "error in getting movie"};
         }
     }
 
     async findById(id) {
         try {
-            var response = await knex.select().where({id: id}).table("movie");
+            var response = await knex.select().where({id}).table("movie");
             return {status: true, response};
         } catch (err) {
-            return {status: false, err: "error in server response"};
+            return {status: false, err: "error in fetching movie"};
         }
     }
 
     async update(dataMovie, id) {
         try {
-            await knex.update(dataMovie).where({id: id}).table("movie");
+            await knex.update(dataMovie).where({id}).table("movie");
             return {status: true};
         } catch (err) {
-            return {status: false, err: "Error in server"};
+            return {status: false, err: "Error in updating movie"};
         }
     }
     
     async destroy(id) {
         try {
-            await knex.delete().where({id: id}).table("movie");
+            await knex.delete().where({id}).table("movie");
             return {status: true};
         } catch(err) {
-            return {status: false, err: "error deleting movie"};
+            return {status: false, err: "Error deleting movie"};
         }
     }
 }
 
-module.exports = new Movie()
+module.exports = new Movie();

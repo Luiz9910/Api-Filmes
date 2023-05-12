@@ -2,7 +2,7 @@ const Movie = require("../models/Movie");
 
 class MovieController {
     async getAll(req, res) {
-        var response = await Movie.getAll();
+        let response = await Movie.getAll();
 
         if (!response.status) {
             res.status(500);
@@ -13,85 +13,52 @@ class MovieController {
         if (response.data.length > 0) {
             res.status(200);
             res.json({movies: response.data});
-        } else {
-            res.status(404);
-            res.json({err: "Not Found"});
+            return;
         }
+
+        res.status(204);
+        res.json({err: "No Content"});
     }
 
     async getMovie(req, res) {
-        var name = req.params.name;
-        if(name == undefined || name == null) {
-            res.status(400);
-            res.json({err: "Id is not a number"});
-        }
+        let name = req.params.name;
 
-        var result = await Movie.findByName(name);
+        let result = await Movie.findByName(name);
         if (!result.status) {
             res.status(500);
             res.json({err: result.err});
             return;
         }
 
-        if (result.data.length > 0) {
-            res.status(200);
-            res.json({data: result.data});
-        } else {
-            res.status(404);
-            res.json({err: "Not Found"});
+        if (result.data.length <= 0) {
+            res.status(204);
+            res.json({err: "No content"});
+            return;
         }
+
+        res.status(200);
+        res.json({data: result.data});
     }
 
     async create(req, res) {
         let {title, details, sinopse, duration, year, classification, cover} = req.body;
 
-        if (title == undefined) {
-            res.status(406);
-            res.json({err: "Invalid title"});
-            return;
-        }
-
-        if (details == undefined) {
-            res.status(406);
-            res.json({err: "Invalid name"});
-            return;
-        }
-
-        if (sinopse == undefined) {
-            res.status(406);
-            res.json({err: "Invalid name"});
-            return;
-        }
-
-        if (duration == undefined) {
-            res.status(406);
-            res.json({err: "Invalid name"});
-            return;
+        const contentsBody = ["title", "details", "sinopse", "duration", "year", "classification", "cover"];
+        const arrayContent = [title, details, sinopse, duration, year, classification, cover];
+        for (let cont of arrayContent) {
+            for (let contentBody of contentsBody) {
+                if (cont == undefined || cont.length == 0) {
+                    res.status(406);
+                    res.json({err: `Invalid ${contentBody}`});
+                    return
+                }
+            }
         }
         
-        if (year == undefined) {
-            res.status(406);
-            res.json({err: "Invalid year"});
-            return;
-        }
-        
-        if (classification == undefined) {
-            res.status(406);
-            res.json({err: "Invalid classification"});
-            return;
-        }
-        
-        if (cover == undefined) {
-            res.status(406);
-            res.json({err: "Invalid cover"});
-            return;
-        }
-
         year = year.replace(/\//g, '-');
-        year = new Date(year).getFullYear()
+        year = new Date(year).getFullYear();
 
-        var resultSaveFilme = await Movie.new(title, details, sinopse, duration, year, classification, cover);
-
+        let resultSaveFilme = await Movie.new(title, details, sinopse, duration, year, classification, cover);
         if (!resultSaveFilme.status) {
             res.status(500);
             res.json({err: resultSaveFilme.err});
@@ -103,17 +70,17 @@ class MovieController {
     }
 
     async update(req, res) {
-        var {title, details, sinopse, duration, year, classification, cover} = req.body;
-        var id = req.params.id;
-        var dataMovie = {};
+        let {title, details, sinopse, duration, year, classification, cover} = req.body;
+        let dataMovie = {};
+        const id = req.params.id;
 
         if (isNaN(id)) {
-            res.status(401);
+            res.status(400);
             res.json({err: "Id is not a number"});
             return;
         }
 
-        var responseId = await Movie.findById(id);
+        let responseId = await Movie.findById(id);
         if(!responseId.status) {
             res.status(500);
             res.json({err: responseId.err});
@@ -126,35 +93,15 @@ class MovieController {
             return;
         }
         
-        if (title != undefined) {
-            dataMovie.title = title;
-        }   
-  
-        if (details != undefined) {
-            dataMovie.details = details;
-        }
+        let contentBody = ["title", "details", "sinopse", "duration", "year", "classification", "cover"];
+        const arrayContent = [title, details, sinopse, duration, year, classification, cover];
+        arrayContent.forEach((content, index) => {
+            if (content != undefined && content.length > 0) {
+                dataMovie[contentBody[index]] = content;
+            }
+        })
 
-        if (sinopse != undefined) {
-            dataMovie.sinopse = sinopse;
-        }   
-  
-        if (duration != undefined) {
-            dataMovie.duration = duration;
-        }
-
-        if (year != undefined) {
-            dataMovie.year = year;
-        }
-
-        if (classification != undefined) {
-            dataMovie.classification = classification;
-        }   
-  
-        if (cover != undefined) {
-            dataMovie.cover = cover;
-        }
-
-        var responseUpdate = await Movie.update(dataMovie, id);
+        let responseUpdate = await Movie.update(dataMovie, id);
         if (!responseUpdate.status) {
             res.status(500);
             res.json({err: responseUpdate.err});
@@ -166,15 +113,15 @@ class MovieController {
     }
 
     async delete(req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
 
         if (isNaN(id)) {
-            res.status(401);
+            res.status(400);
             res.json({err: "Id is not a number"});
             return;
         }
 
-        var responseId = await Movie.findById(id);
+        let responseId = await Movie.findById(id);
         if(!responseId.status) {
             res.status(500);
             res.json({err: responseId.err});
@@ -187,7 +134,7 @@ class MovieController {
             return;
         }
 
-        var responseDestroy = await Movie.destroy(id);
+        let responseDestroy = await Movie.destroy(id);
         if (!responseDestroy.status) {
             res.status(500);
             res.json({err: responseDestroy.err});
@@ -195,7 +142,7 @@ class MovieController {
         }
 
         res.status(200);
-        res.json({response: "Sucessfully deleted"})
+        res.json({response: "Sucessfully deleted"});
     }
 }
 
