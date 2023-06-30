@@ -3,7 +3,7 @@ const knex = require('../database/connection');
 class User {
     async getAll() {
         try {
-            var result = await knex.select(["id","email", "name"]).table("user");
+            const result = await knex.select(["id","email", "name"]).table("user");
             return {status: true, data: result};
         } catch (err) {
             return {status: false, err: "Failed to select"};
@@ -12,7 +12,7 @@ class User {
 
     async findById(id) {
         try {
-            var response = await knex.select(["id", "name", "email"]).where({id}).table("user");
+            const response = await knex.select(["id", "name", "email"]).where({id}).table("user");
             return {status: true, response};
         } catch (err) {
             return {status: false, err: "error in response"};
@@ -21,7 +21,7 @@ class User {
 
     async findEmail(email) {
         try {
-            var result = await knex.select().where({email}).table('user');
+            const result = await knex.select().where({email}).table('user');
             return {status: true, result};
         } catch (err) {
             return {status: false};

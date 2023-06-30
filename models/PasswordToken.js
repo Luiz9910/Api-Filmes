@@ -7,7 +7,7 @@ class PasswordToken {
 
         let numerosAleatorios = [];
         for (let i = 0; i < 6; i++) {
-          numerosAleatorios.push(Math.floor(Math.random() * 9)); // gera um número aleatório entre 0 e 99
+          numerosAleatorios.push(Math.round(Math.random() * 9)); // gera um número aleatório entre 0 e 99
         }
 
         const token = numerosAleatorios.join("");

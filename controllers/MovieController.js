@@ -16,8 +16,7 @@ class MovieController {
             return;
         }
 
-        res.status(204);
-        res.json({err: "No Content"});
+        res.status(204).send();
     }
 
     async getMovie(req, res) {

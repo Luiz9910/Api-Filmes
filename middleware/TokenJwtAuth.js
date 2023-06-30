@@ -4,12 +4,10 @@ const secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 module.exports = function(req, res, next) {
     const authToken = req.headers['authorization'];
     const bearer = authToken.split(' ');
-    let token = bearer[1];
+    const token = bearer[1];
 
     if (token == undefined) {
-        res.status(403);
-        res.json({err:"You are not allowed to access this"});
-        return;
+        return res.status(403).json({err:"You are not allowed to access this"});
     }
 
     try {
@@ -21,7 +19,6 @@ module.exports = function(req, res, next) {
         req.user = {id: decoded.id, name: decoded.name, email: decoded.email, role: decoded.role.data[0]}
         next();
     } catch (err) {
-        res.status(403);
-        res.json({err: err.message});
+        res.status(403).json({err: err.message});
     }
 }

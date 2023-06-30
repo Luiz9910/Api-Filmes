@@ -2,169 +2,141 @@ const User = require("../models/User");
 const PasswordToken = require("../models/PasswordToken");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const validateContentBodyCreate = require("../factory/validationContentBodyCreate")
+const validateContentBodyUpdate = require("../factory/validationContentBodyUpdate")
 
 const secret = "adsuasgdhjasgdhjdgahjsg12hj3eg12hj3g12hj3g12hj3g123";
 
 class UserController {
     async index(req, res) {
-        let response = await User.getAll();
-
-        if (!response.status) {
-            res.status(500);
-            res.json({err: response.err});
-            return;
+        try {
+            const response = await User.getAll();
+          
+            if (!response.status) {
+              return res.status(500).json({ err: response.err });
+            }
+          
+            if (response.data.length <= 0) {
+              return res.status(204).send();
+            }
+          
+            res.status(200).json({users: response.data});
+        } catch (error) {
+            return res.status(500).json({ err: 'An error occurred.' });
         }
-
-        let data = response.data;
-        if (data.length <= 0) {
-            res.status(204);
-            res.json({err: "No Content"});
-            return;
-        } 
-
-        res.status(200);
-        res.send(data);
     }
 
     async findUser(req, res) {
-        let id = req.params.id;
+        try {
+            let id = req.params.id;
 
-        if (isNaN(id)) {
-            res.status(400);
-            res.json({err: "Id is not a number"});
-            return;
+            if (isNaN(id)) {
+                return res.status(400).json({err: "Id is not a number or is invalid"});
+            }
+    
+            let result = await User.findById(id);
+            if (!result.status) {
+                return res.status(500).json({err: result.err});
+            }
+    
+            if (result.response.length <= 0) {
+                return res.status(404).json({err: 'User not found'});
+            }
+    
+            res.status(200).json({user: result.response[0]});
+        } catch (error) {
+            return res.status(500).json({ err: 'An error occurred.' });
         }
-
-        let result = await User.findById(id);
-        if (!result.status) {
-            res.status(500);
-            res.json({err: result.err});
-            return;
-        }
-
-        if (result.response.length <= 0) {
-            res.status(404);
-            res.json({err: 'User not found'});
-            return;
-        }
-
-        res.status(200);
-        res.send(result.response[0]);
     }
 
     async create(req, res) {
-        let {name, email, password} = req.body;
-        let contentBody = [name, email, password]
-        const nameContent = ["name", "email", "password"]
+        try {
+            const {name, email, password} = req.body;
+            const contentBody = {name, email, password}
 
-        for (let content of contentBody) {
-            for (let cont of nameContent) {
-                if (content == undefined || content.length == 0) {
-                    res.status(406);
-                    res.json({err: `Invalid ${cont}`});
-                    return;
-                }
+            const invalidFields = validateContentBodyCreate(contentBody);
+
+            if (Object.keys(invalidFields).length > 0) {
+                return res.status(406).json({ err: invalidFields });
             }
+
+            const resultEmail = await User.findEmail(email);
+            if(!resultEmail.status) {
+                return res.status(500).json({err: resultEmail.err});
+            }
+    
+            if (resultEmail.result.length > 0) {
+                return res.status(409).json({err: "Email already exists"});
+            }
+    
+            const saltRounds = 10;
+            const hash = await bcrypt.hash(password, saltRounds);
+    
+            const resultCreate = await User.new(name, email, hash);
+            if (!resultCreate.status) {
+                return res.status(500).json({err: resultCreate.err});
+            }
+    
+            res.status(201).json({response: "Sucessfully created"});
+        } catch (error) {
+            return res.status(500).json({ err: 'An error occurred.' });
         }
-
-        var resultEmail = await User.findEmail(email);
-        if(!resultEmail.status) {
-            res.status(500);
-            res.json({err: resultEmail.err});
-            return;
-        } 
-
-        if (resultEmail.result.length > 0) {
-            res.status(409);
-            res.json({err: "Email exist"});
-            return;
-        }
-
-        const saltRounds = 10;
-        let hash = await bcrypt.hash(password, saltRounds);
-
-        let resultCreate = await User.new(name, email, hash);
-        if (!resultCreate.status) {
-            res.status(500);
-            res.json({err: resultCreate.err});
-        }
-
-        res.status(201);
-        res.json({response: "Sucessfully created"});
     }
 
     async userUpdate(req, res) {
-        let {name, email} = req.body;
-        let dataUser = {};
-
-        let id = req.params.id;
-        if (isNaN(id)) {
-            res.status(400);
-            res.json({err: "Id is not a number or is invalid"});
-            return;
-        }
-
-        let result = await User.findById(id);
-        let resultId = result.response;
-
-        if (resultId.length <= 0) {
-            res.status(404)
-            res.json({err: "User not found"})
-            return;
-        }
-        
-        let contentBody = [name, email]
-        const nameContent = ["name", "email"]
-        contentBody.forEach((content, index) => {
-            if (content != undefined && content.length > 0) {
-                dataUser[nameContent[index]] = content;
+        try {
+            const id = req.params.id;
+            if (isNaN(id)) {
+                return res.status(400).json({err: "Id is not a number or is invalid"});
             }
-        })
+    
+            const result = await User.findById(id);
+            if (result.response.length <= 0) {
+                return res.status(404).json({err: "User not found"});
+            }
+            
+            const contentBody = {name: req.body.name, email: req.body.email};
+            const dataUser = validateContentBodyUpdate(contentBody);
+            if (Object.keys(dataUser).length <= 0) {
+                return res.status(204).send();
+            }
 
-        let resultUpdate = await User.update(dataUser, id);
-        if (!resultUpdate.status) {
-            res.status(500);
-            res.json({err: "Error updating"});
-            return;
+            const resultUpdate = await User.update(dataUser, id);
+            if (!resultUpdate.status) {
+                return res.status(500).json({err: "Error updating"});
+            }
+    
+            res.status(200).json({response: "All right!"});
+        } catch (error) {
+            return res.status(500).json({ err: 'An error occurred.' });
         }
-
-        res.status(200);
-        res.json({response: "All right!"})
     }
 
     async remove(req, res) {
-        let id = req.params.id;
-
-        if (isNaN(id)){
-            res.status(400);
-            res.json({err: "Syntax invalid, id is not number"});  
-            return;
-        }    
-
-        let result = await User.findById(id);
-        let resultUser = result.response;
+        try {
+            const id = req.params.id;
+            if (isNaN(id)){
+                return res.status(400).json({err: "Id is not a number or is invalid"});  
+            }    
     
-        if (!result.status) {
-            res.status(500);
-            res.json({err: result.err});
-            return;
+            const result = await User.findById(id);
+            if (!result.status) {
+                return res.status(500).json({err: result.err});
+            }
+    
+            if (result.response.length <= 0) {
+                return res.status(404).json({err: "User not found"});
+            } 
+    
+            let resultDelete = await User.deleteUser(id);
+            if (!resultDelete.status) {
+                return res.status(500).json({err: resultDelete.err});
+            }
+            
+            res.status(200).json({response: "User deleted sucessfully"});
+        } catch (error) {
+            return res.status(500).json({ err: 'An error occurred.' });
         }
-
-        if (resultUser.length <= 0) {
-            res.status(404);
-            res.json({err: "User not found"});
-            return;
-        } 
-
-        let resultDelete = await User.deleteUser(id);
-        if (!resultDelete.status) {
-            res.status(500);
-            res.json({err: resultDelete.err});
-            return;
-        }
-        
-        res.status(200);
-        res.json({response: "User deleted sucessfully"});
     }
 
     async recoverpassword(req, res) {
@@ -209,48 +181,40 @@ class UserController {
     }
     
     async login(req, res) {
-        var {email, password} = req.body; 
+        try {
+            const {email, password} = req.body; 
+            const contentBody = {email, password}
 
-        if (email == undefined || email.length == 0) {
-            res.status(400);
-            res.json({err: "Email is invalid "});
-            return;
+            const invalidFields = validateContentBodyCreate(contentBody);
+            if (Object.keys(invalidFields).length > 0) {
+                return res.status(406).json({ err: invalidFields });
+            }
+            
+            let resultUserEmail = (await User.findEmail(email)).result[0];
+            if (resultUserEmail == undefined) {
+                return res.status(404).json({err: "User not found "}); 
+            }
+    
+            if (resultUserEmail.email != email) {
+                return res.status(401).json({err: "Email is incorrect"});
+            } 
+            
+            if (!await bcrypt.compare(password, resultUserEmail.password)) {
+                return res.status(401).json({err: "Invalid password"});
+            }
+            
+            const token = jwt.sign({id: resultUserEmail.id,
+                name:resultUserEmail.name,
+                email, 
+                role: resultUserEmail.role
+            }, 
+            secret,
+            {expiresIn: "48h"});
+    
+            res.status(200).json({token});
+        } catch (error) {
+            return res.status(500).json({ err: 'An error occurred.' });
         }
-
-        if (password == undefined || password.length == 0) {
-            res.status(400);
-            res.json({err: "Password is invalid "});
-            return;
-        }
-        
-        let resultUserEmail = await User.findEmail(email);
-        resultUserEmail = resultUserEmail.result[0]
-        if (resultUserEmail == undefined) {
-            res.status(404);
-            res.json({err: "User not found "}); 
-            return;
-        }
-
-        if (resultUserEmail.email != email) {
-            res.status(401);
-            res.json({err: "Email is incorrect"});
-            return;
-        } 
-        
-        if (!await bcrypt.compare(password, resultUserEmail.password)) {
-            res.status(401);
-            res.json({err: "Invalid password"});
-        }
-        
-        let token = jwt.sign({id: resultUserEmail.id,
-            name:resultUserEmail.name,
-            email, 
-            role: resultUserEmail.role
-        }, 
-        secret,
-        {expiresIn: "48h"});
-        res.status(200);
-        res.json({token: token});
     }
 }
 

@@ -12,6 +12,7 @@ router.get('/user/:id?', AuthToken, AdminAuth, UserController.findUser);
 router.post('/user', UserController.create);
 router.delete('/user/:id?', AuthToken, ValidationUser, UserController.remove);
 router.put('/user/:id?', AuthToken, ValidationUser, UserController.userUpdate);
+
 // ajeitar tudo sobre os que tão
 router.post('/recoverpassword', UserController.recoverpassword);
 router.post("/changepassword/:id", UserController.changePassword);
