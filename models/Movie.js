@@ -12,7 +12,7 @@ class Movie {
 
     async getAll() {
         try {
-            var result = await knex.select().table("movie");
+            const result = await knex.select().table("movie");
             return {status: true, data: result};
         }catch(err) {
             return {status: false, err: "error in getting movies"};
@@ -21,7 +21,7 @@ class Movie {
     
     async findByName(name) {
         try {
-            var response = await  knex.select()
+            const response = await  knex.select()
                 .whereILike("title", "%"+ name +"%")
                 .table("movie");
             return {status: true, data: response};
@@ -32,7 +32,7 @@ class Movie {
 
     async findById(id) {
         try {
-            var response = await knex.select().where({id}).table("movie");
+            const response = await knex.select().where({id}).table("movie");
             return {status: true, response};
         } catch (err) {
             return {status: false, err: "error in fetching movie"};

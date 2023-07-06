@@ -1,7 +1,10 @@
 const express = require("express")
 const router = express.Router();
+
 const UserController = require("../controllers/UserController")
 const MovieController = require("../controllers/MovieController");
+const Favorite_movie = require("../controllers/Favorite_movieController")
+
 const AdminAuth = require("../middleware/AdminAuth");
 const AuthToken = require("../middleware/TokenJwtAuth");
 const ValidationUser = require("../middleware/ValidationUser");
@@ -24,5 +27,10 @@ router.get("/movie/:name?", MovieController.getMovie);
 router.post("/movie", MovieController.create);
 router.put("/movie/:id?", MovieController.update);
 router.delete("/movie/:id?", MovieController.delete);
+
+//Favorites Movies
+router.get("/favoritesmovies", AuthToken, Favorite_movie.getAllMovieOfUser);
+router.post("/favoritesmovies", AuthToken, Favorite_movie.create);
+router.delete("/favoritesmovies/:id?", Favorite_movie.deleteFavoriteMovieOfUser)
 
 module.exports = router;

@@ -45,7 +45,6 @@ class User {
             return {status: false};
         }
     }
-
       
     async deleteUser(id) {
         try {
@@ -57,4 +56,4 @@ class User {
     }
 }
 
-module.exports = new User();    
+module.exports = new User();
