@@ -1,6 +1,6 @@
-const FavoriteMovie = require("../models/Favorite_movie"); 
-const Movie = require("../models/Movie"); 
-const User = require("../models/User"); 
+const FavoriteMovie = require("../models/Favorite_movie");
+const Movie = require("../models/Movie");
+const User = require("../models/User");
 
 class Favorite_movieController {
     async create(req, res) {
@@ -19,12 +19,12 @@ class Favorite_movieController {
                 ) {
                 return res.status(404).json({err: 'User not found or Movie not found'});
             }
-    
+
             const ResponseFavoriteMovie = await FavoriteMovie.new(user_id, movie_id);
             if (!ResponseFavoriteMovie.status) {
                 return res.status(500).json({ err: ResponseFavoriteMovie.err});
             }
-    
+
             res.status(201).send();
         } catch (err) {
             return res.status(500).json({ err: 'An error occurred.'});
@@ -37,7 +37,7 @@ class Favorite_movieController {
             if (!responseMovie.status) {
                 return res.status(500).json({err: response.err});
             }
-    
+
             if (responseMovie.data.length == 0) {
                 return res.status(204).send();
             }
@@ -55,7 +55,7 @@ class Favorite_movieController {
             if (isNaN(id)) {
                 return res.status(400).json({err: "id is not a number"})
             }
-    
+
             const resultFindMovieFavorite = await FavoriteMovie.getOne(id)
             if (!resultFindMovieFavorite.status) {
                 return res.status(500).json({err: resultFindMovieFavorite.err})
@@ -69,9 +69,9 @@ class Favorite_movieController {
             if (!responseDeleteFavoriteMovie) {
                 return res.status(500).json({err: responseDeleteFavoriteMovie.err})
             }
-    
+
             res.status(204).send()
-        } catch {
+        } catch(error) {
             return res.status(500).json({ err: 'An error occurred.'});
         }
     }

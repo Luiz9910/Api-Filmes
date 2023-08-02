@@ -1,9 +1,11 @@
 const express = require("express");
 const app = express();
 const router = require("./routes/routes");
+const helmet = require('helmet');
+
+app.use(helmet());
 
 // parse application/json
-app.use("/favicon.ico", express.static("src/images/favicon.ico"));
 app.use(express.json());
 app.use(router);
 

@@ -45,7 +45,7 @@ class User {
             return {status: false};
         }
     }
-      
+
     async deleteUser(id) {
         try {
             await knex.delete().where({id}).table('user');

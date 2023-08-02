@@ -9,11 +9,11 @@ class MovieController {
             if (!response.status) {
                 return res.status(500).json({err: response.err});
             }
-    
+
             if (response.data.length > 0) {
                 return res.status(200).json({movies: response.data});
             }
-    
+
             res.status(204).send();
         } catch (error) {
             return res.status(500).json({ err: 'An error occurred.' });
@@ -24,15 +24,15 @@ class MovieController {
         try {
             const name = req.params.name;
             const result = await Movie.findByName(name);
-    
+
             if (!result.status) {
                 return res.status(500).json({err: result.err});
             }
-    
+
             if (result.data.length <= 0) {
                 return res.status(204).json({err: "No content"});
             }
-    
+
             res.status(200).json({movies: result.data});
         } catch (error) {
             return res.status(500).json({ err: 'An error occurred.' });
@@ -48,16 +48,16 @@ class MovieController {
             if (Object.keys(invalidFields).length > 0) {
                 return res.status(400).json({ err: invalidFields });
             }
-    
+
             year = year.replace(/\//g, '-');
             year = new Date(year).getFullYear();
-    
+
             let resultSaveFilme = await Movie.new(title, details, sinopse, duration, year, classification, cover);
             if (!resultSaveFilme.status) {
                 return res.status(500).json({err: resultSaveFilme.err});
             }
-    
-            res.status(201).json({result: "Successfully saved movie"});    
+
+            res.status(201).json({result: "Successfully saved movie"});
         } catch (error) {
             return res.status(500).json({ err: 'An error occurred.'});
         }
@@ -67,16 +67,16 @@ class MovieController {
         try {
             let {title, details, sinopse, duration, year, classification, cover} = req.body;
             const id = req.params.id;
-    
+
             if (isNaN(id)) {
                 return res.status(400).json({err: "Id is not a number"});
             }
-    
+
             const responseId = await Movie.findById(id);
             if(!responseId.status) {
                 return res.status(500).json({err: responseId.err});
-            } 
-    
+            }
+
             if (responseId.response.length <= 0) {
                 return res.status(404).json({err: "Movie not found to update"});
             }
@@ -91,13 +91,13 @@ class MovieController {
             if (Object.keys(dataMovie).length <= 0) {
                 return res.status(204).send();
             }
-    
+
             let responseUpdate = await Movie.update(dataMovie, id);
             if (!responseUpdate.status) {
                 return res.status(500).json({err: responseUpdate.err});
-            } 
-    
-            res.status(200).json({response: "Success in updating"});   
+            }
+
+            res.status(200).json({response: "Success in updating"});
         } catch (error) {
             return res.status(500).json({ err: 'An error occurred.'});
         }
@@ -114,7 +114,7 @@ class MovieController {
             const responseId = await Movie.findById(id);
             if(!responseId.status) {
                 return res.status(500).json({err: responseId.err});
-            } 
+            }
 
             if (responseId.response.length <= 0) {
                 return res.status(404).json({err: "Movie not found"});

@@ -18,7 +18,7 @@ class Movie {
             return {status: false, err: "error in getting movies"};
         }
     }
-    
+
     async findByName(name) {
         try {
             const response = await  knex.select()
@@ -47,7 +47,7 @@ class Movie {
             return {status: false, err: "Error in updating movie"};
         }
     }
-    
+
     async destroy(id) {
         try {
             await knex.delete().where({id}).table("movie");

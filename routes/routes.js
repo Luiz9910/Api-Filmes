@@ -5,9 +5,9 @@ const UserController = require("../controllers/UserController")
 const MovieController = require("../controllers/MovieController");
 const Favorite_movie = require("../controllers/Favorite_movieController")
 
-const AdminAuth = require("../middleware/AdminAuth");
-const AuthToken = require("../middleware/TokenJwtAuth");
-const ValidationUser = require("../middleware/ValidationUser");
+const AdminAuth = require("../middlewares/AdminAuth");
+const AuthToken = require("../middlewares/TokenJwtAuth");
+const ValidationUser = require("../middlewares/ValidationUser");
 
 //Users
 router.get('/',  AuthToken, AdminAuth, UserController.index);

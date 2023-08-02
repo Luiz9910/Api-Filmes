@@ -3,22 +3,22 @@ const User = require("./User");
 
 class PasswordToken {
     async create(email) {
-        var resultUser = await User.findEmail(email);
+        let resultUser = await User.findEmail(email);
 
         let numerosAleatorios = [];
         for (let i = 0; i < 6; i++) {
-          numerosAleatorios.push(Math.round(Math.random() * 9)); // gera um número aleatório entre 0 e 99
+            numerosAleatorios.push(Math.round(Math.random() * 9)); // gera um número aleatório entre 0 e 99
         }
 
         const token = numerosAleatorios.join("");
 
-        if (resultUser != undefined) {         
-                try {
-                    await knex.insert({token, used: 0, user_id:resultUser.result.id }).table("passwordtokens");
-                    return {status: true, token};
-                } catch(err) {
-                    return {status: false, err: "Error in creating token", estate: 400};
-                }
+        if (resultUser != undefined) {
+            try {
+                await knex.insert({token, user_email: resultUser.result[0].email }).table("passwordtokens");
+                return {status: true, token};
+            } catch(err) {
+                return {status: false, err: err, estate: 400};
+            }
         } else {
             return {status: false, err: "user not Found, email not exist", estate: 404};
         }
@@ -27,16 +27,16 @@ class PasswordToken {
     async validateTokenOfUser(id) {
         try {
             var resultToken = await knex.select(["passwordtokens.token", "user.name as userNAme", "passwordtokens.used as usedToken"]).table("user").innerJoin("passwordtokens", "passwordtokens.user_id", "user.id").where("user_id", id);
-            
+
             if (resultToken[0].usedToken == 1) {
-                return {status: false, err: "Token já foi usado", estate: 404}; 
+                return {status: false, err: "Token já foi usado", estate: 404};
             }
 
             if (resultToken.length > 0) {
-                
+
                 var resultSet = await this.setUsed(id);
                 if (resultSet.status) {
-                    return {status: true, result: resultToken}; 
+                    return {status: true, result: resultToken};
                 } else {
                     return {status: false, err: resultSet.err , estate: resultSet.estate};
                 }
@@ -53,7 +53,7 @@ class PasswordToken {
     async setUsed(id) {
         try {
             await knex.update({used: 1}).where({user_id: id}).table("passwordtokens");
-            return {status: true}; 
+            return {status: true};
         } catch (err) {
             return {status: false, err: "Server database error in setUser", estate: 500};
         }

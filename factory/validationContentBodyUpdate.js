@@ -3,11 +3,10 @@ module.exports = function validateContentBodyUpdate(contentBody) {
 
     for (let content in contentBody) {
         if (contentBody[content] != undefined && contentBody[content].length > 0) {
-            
+
             data[content] = contentBody[content];
         }
     }
 
     return data;
 }
-  
