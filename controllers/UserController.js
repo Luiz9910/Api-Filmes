@@ -156,7 +156,7 @@ class UserController {
                 return res.status(resultPassword.estate).json({ err: resultPassword.err });
             }
 
-            const responseEmailSend = await sendEmail(email)
+            const responseEmailSend = await sendEmail(email, resultPassword.token)
             if (!responseEmailSend) {
                 return res.status(500).json({ send: "Failed to send" });
             }
