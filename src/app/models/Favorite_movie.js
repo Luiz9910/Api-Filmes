@@ -1,4 +1,4 @@
-const knex = require('../database/connection');
+const knex = require('../../database/connection');
 
 class Favorite_movie {
     async new(user_id, movie_id) {

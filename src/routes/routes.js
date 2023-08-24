@@ -1,13 +1,13 @@
 const express = require("express")
 const router = express.Router();
 
-const UserController = require("../controllers/UserController")
-const MovieController = require("../controllers/MovieController");
-const Favorite_movie = require("../controllers/Favorite_movieController")
+const UserController = require("../app/controllers/UserController")
+const MovieController = require("../app/controllers/MovieController");
+const Favorite_movie = require("../app/controllers/Favorite_movieController")
 
-const AdminAuth = require("../middlewares/AdminAuth");
-const AuthToken = require("../middlewares/TokenJwtAuth");
-const ValidationUser = require("../middlewares/ValidationUser");
+const AdminAuth = require("../app/middlewares/AdminAuth");
+const AuthToken = require("../app/middlewares/TokenJwtAuth");
+const ValidationUser = require("../app/middlewares/ValidationUser");
 
 //Users
 router.get('/',  AuthToken, AdminAuth, UserController.index);
@@ -18,7 +18,7 @@ router.put('/user/:id?', AuthToken, ValidationUser, UserController.userUpdate);
 
 // ajeitar tudo sobre os que tão
 router.post('/recoverpassword', UserController.recoverpassword);
-router.post("/changepassword/:id", UserController.changePassword);
+router.post("/changepassword", UserController.changePassword);
 router.post('/login', UserController.login); // pronto
 
 //Movies

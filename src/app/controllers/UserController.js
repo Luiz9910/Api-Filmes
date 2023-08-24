@@ -8,6 +8,7 @@ const validateContentBodyUpdate = require("../factory/validationContentBodyUpdat
 
 //Utils
 const sendEmail = require("../utils/emailSender");
+const validateDate = require("../utils/dateValidation");
 
 class UserController {
     async index(req, res) {
@@ -153,41 +154,65 @@ class UserController {
 
             let resultPassword = await PasswordToken.create(email);
             if (!resultPassword.status) {
-                return res.status(resultPassword.estate).json({ err: resultPassword.err });
+                return res
+                    .status(resultPassword.estate)
+                    .json({ err: resultPassword.err });
             }
 
-            const responseEmailSend = await sendEmail(email, resultPassword.token)
+            const responseEmailSend = await sendEmail(
+                email,
+                resultPassword.token
+            );
             if (!responseEmailSend) {
                 return res.status(500).json({ send: "Failed to send" });
             }
 
             res.status(200).json({ send: "Token has been sent to your email" });
         } catch (error) {
-            return res.status(500).json(error);
+            return res.status(500).json({ error: error.message });
         }
     }
 
     async changePassword(req, res) {
-        var token = req.body.token;
-        var id = req.params.id;
-
-        if (!isNaN(id)) {
-            var resultToken = await PasswordToken.validateTokenOfUser(id);
-            if (resultToken.status) {
-                if (resultToken.result[0].token == token) {
-                    res.status(200);
-                    res.json({ response: "All Right!" });
-                } else {
-                    res.status(406);
-                    res.json({ err: "Sintax error (token)" });
-                }
-            } else {
-                res.status(resultToken.estate);
-                res.json({ err: resultToken.err });
+        try {
+            const tokenPassword = req.body.token;
+            if (
+                !(
+                    (tokenPassword != undefined && tokenPassword !== null) ||
+                    tokenPassword !== ""
+                )
+            ) {
+                return res.status(400).json({ err: "Token invalid" });
             }
-        } else {
-            res.status(400);
-            res.json({ err: "Id is not a number or is invalid" });
+
+            const resultChangePassword = await PasswordToken.findPasswordToken(
+                tokenPassword
+            );
+            if (!resultChangePassword.status) {
+                return res.status(500).json({ err: resultChangePassword.err });
+            }
+
+            if (
+                resultChangePassword.result == undefined ||
+                resultChangePassword.result == ""
+            ) {
+                return res.status(400).json({ err: "Token invalid" });
+            }
+
+            let time = resultChangePassword.result[0].time_expiration.replace(
+                /\D/g,
+                ""
+            );
+
+            let date = resultChangePassword.result[0].date_expiration;
+            const revalidateDate = validateDate(date);
+            if (revalidateDate) {
+                return res.status(400).json({ err: "Token invalid" });
+            }
+
+            res.status(200).json({ result: resultChangePassword.result });
+        } catch (err) {
+            return res.status(500).json({ err: "An error occurred." });
         }
     }
 

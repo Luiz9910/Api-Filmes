@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const router = require("./routes/routes");
+const router = require("./src/routes/routes");
 const helmet = require('helmet');
 
 app.use(helmet());
